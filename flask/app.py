@@ -1,6 +1,7 @@
 import os
-import pickle
 import json
+import pickle
+import requests
 
 from flask import Flask, request, jsonify, render_template
 import numpy as np
@@ -13,6 +14,7 @@ from pyspark.mllib.common import _to_java_object_rdd
 
 global W2V_MODEL
 global SVM_MODEL
+SPECIAL_DELIMETER = ' ------------------------ '
 
 from pyspark import SparkContext
 sc = SparkContext.getOrCreate()
@@ -26,7 +28,7 @@ def vectorize(text):
     for token in text.split():
         try:
             vec = W2V_MODEL.wv.get_vector(token.lower())
-            print(vec)
+            # print(vec)
             sum_vec += vec
         except:
             pass
@@ -34,6 +36,31 @@ def vectorize(text):
         return None
     else:
         return sum_vec
+
+def comment_from_page(page_url, max=None):
+    # request page
+    r = requests.get(page_url)
+    page_html = BeautifulSoup(r.text, 'html.parser')
+
+    # get comment params
+    cmt_input = json.loads(page_html.find('div', {'id':'box_comment_vne'})['data-component-input'])
+    
+    # request comment
+    cmt_url = 'https://usi-saas.vnexpress.net/index/get?offset=0&limit=24'
+    cmt_url += '&objectid=' + str(cmt_input['article_id'])
+    cmt_url += '&objecttype=' + str(cmt_input['article_type'])
+    cmt_url += '&siteid=' + str(cmt_input['site_id'])
+    cmt_url += '&categoryid=' + str(cmt_input['category_id'])
+    cmt_url += '&sign=' + str(cmt_input['sign'])
+
+    cmt_request = requests.get(cmt_url)
+    cmt_response = BeautifulSoup(cmt_request.text, 'html.parser')
+    
+    items = json.loads(cmt_response.text)['data']['items']
+    return [[item['comment_id'],
+             item['content'],
+             item['creation_time']]
+             for item in items]
 
 
 @app.route("/")
@@ -56,6 +83,37 @@ def classify():
         return jsonify(result=result)
     else:
         return None
+
+@app.route('/classify_article', methods=['POST'])
+def classify_article():
+    page_url = request.form.get('page_url')
+    cmt = comment_from_page(page_url, 5)
+    results = []
+    print(cmt)
+
+    content = [content for _, content, _ in cmt]
+    content_merge = SPECIAL_DELIMETER.join(content)
+    content_merge_tokened = token.tokenizeOneLine(content_merge)
+
+    for content_tokened in content_merge_tokened.split(SPECIAL_DELIMETER):
+        print(content_tokened)
+        input_vec = vectorize(content_tokened)
+
+        if all(input_vec):
+            result = SVM_MODEL.predict([input_vec])
+            print(result)
+            result = 'pos' if result[0]==1 else 'neg'
+
+            results.append(result)
+    print(result)
+    response = {
+        'url': page_url,
+        'cmt': content,
+        'sent': results
+    }
+    
+    return jsonify(response)
+
 
 
 # Import vnTokenizer from Java
