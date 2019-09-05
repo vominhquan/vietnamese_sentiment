@@ -46,22 +46,22 @@ $(document).ready(function() {
     // load news
     function load_news(url) {
         console.log('url', url)
-        $('#ifr').attr('src', url)
+        // $('#ifr').attr('src', url)
     }
 
     // load cmt
-    function load_cmt(data_json) {
-        console.log('url', data_json.cmt)
-        $('.list-group').empty()
-        for (var i in data_json.cmt) {
-            style = data_json.sent[i] == "neg" ? "danger" : "success"
-            li = '<li class="list-group-item list-group-item-' + style
-            li += '">' + data_json.cmt[i] + '</li>'
-            $('.list-group').append(li)
-        }
-    }
+    // function load_cmt(data_json) {
+    //     console.log('url', data_json.cmt)
+    //     $('.list-group').empty()
+    //     for (var i in data_json.cmt) {
+    //         style = data_json.sent[i] == "neg" ? "danger" : "success"
+    //         li = '<li class="list-group-item list-group-item-' + style
+    //         li += '">' + data_json.cmt[i] + '</li>'
+    //         $('.list-group').append(li)
+    //     }
+    // }
 
-    draw_chart(20);
+    // draw_chart(20);
 
     // classify a sentence
     $('#run').click(function() {
@@ -89,44 +89,44 @@ $(document).ready(function() {
     });
 
     // choose news
-    $('#news').change(function() {
-        val = $(this).val();
+    // $('#news').change(function() {
+    //     val = $(this).val();
 
-        if (val == 1) {
-            data_json = window.data_1_json
-        } else if (val == 2) {
-            data_json = window.data_2_json
-        } else if (val == 3) {
-            data_json = window.data_3_json
-        } else if (val == 4) {
-            data_json = window.data_4_json
-        }
+    //     if (val == 1) {
+    //         data_json = window.data_1_json
+    //     } else if (val == 2) {
+    //         data_json = window.data_2_json
+    //     } else if (val == 3) {
+    //         data_json = window.data_3_json
+    //     } else if (val == 4) {
+    //         data_json = window.data_4_json
+    //     }
 
-        pos_percent = data_json.sent.filter(word => word == 'pos').length / data_json.sent.length * 100
+    //     pos_percent = data_json.sent.filter(word => word == 'pos').length / data_json.sent.length * 100
 
-        load_news(data_json.url)
-        load_cmt(data_json)
-        draw_chart(pos_percent)
-    })
+    //     load_news(data_json.url)
+    //     load_cmt(data_json)
+    //     draw_chart(pos_percent)
+    // })
 
     // choose url
-    $('#news_url').change(function() {
-        val = $(this).val();
-        console.log(val);
-        load_news(val);
+    // $('#news_url').change(function() {
+    //     val = $(this).val();
+    //     console.log(val);
+    //     load_news(val);
 
-        $.ajax({
-            url: '/classify_article',
-            method: 'POST',
-            data: { 'page_url': val }
-        }).done(function(data_json) {
-            pos_percent = data_json.sent.filter(word => word == 'pos').length / data_json.sent.length * 100
-            load_cmt(data_json)
-            draw_chart(pos_percent)
-        }).fail(function(error) {
-            console.log('error', error);
-        })
-    })
+    //     $.ajax({
+    //         url: '/classify_article',
+    //         method: 'POST',
+    //         data: { 'page_url': val }
+    //     }).done(function(data_json) {
+    //         pos_percent = data_json.sent.filter(word => word == 'pos').length / data_json.sent.length * 100
+    //         load_cmt(data_json)
+    //         draw_chart(pos_percent)
+    //     }).fail(function(error) {
+    //         console.log('error', error);
+    //     })
+    // })
 })
 </script>
 <style type="text/css">
@@ -180,14 +180,14 @@ $(document).ready(function() {
                 <h2 id='neg' style="display: none;"><span class="label label-danger">Tiêu cực</span></h2>
             </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col col-sm-12">
                 <div class="page-header">
                     <h1>Phân tích ý kiến bình luận từ bài báo</h1>
                 </div>
             </div>
-        </div>
-        <div class="row">
+        </div> -->
+        <!-- <div class="row">
             <div class="col col-sm-8">
                 <div class="form-group">
                     <div class="form-group">
@@ -208,7 +208,6 @@ $(document).ready(function() {
             </div>
             <div class="col col-sm-4">
                 <div class="form-group" id='canvas'>
-                    <!-- <canvas id="myChart" width="400" height="400"></canvas> -->
                 </div>
                 <ul class="list-group">
                     <li class="list-group-item list-group-item-danger">ăn nhậu vô là mất hết lí trí</li>
@@ -218,6 +217,6 @@ $(document).ready(function() {
                     <li class="list-group-item list-group-item-success">Chỉ mong cải tạo tốt</li>
                 </ul>
             </div>
-        </div>
+        </div> -->
     </div>
 </body>

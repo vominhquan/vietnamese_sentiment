@@ -1,0 +1,8 @@
+gensim
+flask
+numpy
+pandas
+tensorflow
+keras
+underthesea
+matplotlib
